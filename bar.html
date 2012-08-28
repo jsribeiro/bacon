@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bacon Toolbar</title>
+        <script>
+            // Bar identifier. Must match what is defined in the extension.
+            var barIdentifier = "Bacon Bar";
+
+            var previousActiveTab;
+            // Variable that stores the last queried URL.
+            var lastURL;
+
+            // "Not found" bar template.
+            var outputNotFoundTemplate = 'This page was not found on reddit. (<a href="{submitURL}">submit</a>)';
+            // "Found" bar template.
+            var outputFoundTemplate = '<span id="score">({score})</span> <a href="{permalinkURL}">{title}</a> - posted by <a href="{redditURL}/user/{author}">{author}</a> to <a href="{redditURL}/r/{subreddit}">/r/{subreddit}</a> (<a href="{permalinkURL}">{comments} comments</a>)';
+
+            safari.self.hide();
+
+            setInterval("verifyTabChange()", 200);
+            function verifyTabChange() {
+                var parsedOutput, currentTab, activeTabURL;
+
+                currentTab = safari.application.activeBrowserWindow.activeTab;
+                activeTabURL = currentTab.url;
+
+                if (currentTab === previousActiveTab || activeTabURL === lastURL) {
+                    return;
+                }
+
+                previousActiveTab = currentTab;
+                lastURL = activeTabURL;
+
+                if (safari.self.visible) {
+                    safari.self.hide();
+                }
+                document.body.innerHTML = '';
+
+                safari.extension.globalPage.contentWindow.bacon(currentTab.url);
+            }
+
+            function handleOutput(output) {
+                var parsedOutput;
+
+                if ((! safari.self.visible) && (output.found === "true" || output.found === "error")) {
+                    safari.self.show();
+                }
+
+                if (output.found === "error") {
+                    document.body.innerHTML = 'Error while fetching information from Reddit...';
+                } else {
+                    parsedOutput = safari.extension.globalPage.contentWindow.parseOutput(output.found === "true" ? outputFoundTemplate : outputNotFoundTemplate, output.data);
+                    document.body.innerHTML = parsedOutput;
+                }
+            }
+        </script>
+        <style type="text/css">
+            span#score {
+                font-weight: bold;
+            }
+            a {
+                text-decoration: none;
+            }
+            a:link, a:visited, a:active {
+                color: #666666;
+            }
+            a:hover {
+                color: #999999;
+            }
+        </style>
+    </head>
+    <body>Hello, world!</body>
+</html>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>DefaultValue</key>
+		<true/>
+		<key>Key</key>
+		<string>correctImgurLinks</string>
+		<key>Title</key>
+		<string>Correct potentially incorrect 'imgur.com' links</string>
+		<key>Type</key>
+		<string>CheckBox</string>
+	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<string>popover</string>
+		<key>Key</key>
+		<string>usePopoverOrBar</string>
+		<key>Title</key>
+		<string>Behavior</string>
+		<key>Titles</key>
+		<array>
+			<string>Toolbar button shows popover with page information or submission link</string>
+			<string>Extension bar appears when page is already submitted and toolbar button submits it when not</string>
+		</array>
+		<key>Type</key>
+		<string>RadioButtons</string>
+		<key>Values</key>
+		<array>
+			<string>popover</string>
+			<string>bar</string>
+		</array>
+	</dict>
+</array>
+</plist>

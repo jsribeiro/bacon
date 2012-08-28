@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bacon Global Page</title>
+        <script src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
+        <script src="https://raw.github.com/trix/nano/master/jquery.nano.js"></script>
+        <script>
+            // Reddit base URL.
+            var redditURL = "http://www.reddit.com";
+            // Reddit API address for information on URL.
+            var redditAPIInfo = "/api/info.json";
+            // Reddit submission address.
+            var redditSubmit = "/submit?url=";
+            // Icon to use in popover.
+            var redditIcon = "icon.png";
+            // Toolbar item identifier. Must match what is defined in the extension.
+            var toolbarItemIdentifier = "Bacon";
+
+            // Correct imgur URLs, by removing subdomains and file extensions.
+            function fixImgurURL(url) {
+                var protocol, address, newURL;
+
+                // Get protocol (http or https).
+                protocol = url.substring(0, url.indexOf("://"));
+                // Get address, the URL minus protocol and separator ("://").
+                address = url.substring(url.indexOf("://") + 3);
+
+                // If there's a subdomain on the address (eg. "i."), remove it.
+                if (address.indexOf("imgur.com/") > 0) {
+                    address = address.substring(address.indexOf("imgur.com/"));
+                }
+                // If there's an extension (".abc") after "imgur.com/", remove it.
+                if (address.lastIndexOf(".") > (address.lastIndexOf("imgur.com/") + 9)) {
+                    address = address.substring(0, address.lastIndexOf("."));
+                }
+
+                // Construct new URL (with protocol and address) and return it.
+                newURL = protocol + "://" + address;
+                return newURL;
+            }
+
+            function parseOutput(template, data) {
+                return jQuery.nano(template, data);
+            }
+
+            // Function that fetches and prints information from Reddit about an URL.
+            function bacon(url) {
+                var localRedditAPIInfo = redditAPIInfo, jsonRequest;
+
+                // Fetch this URL information through Reddit API.
+                //jQuery.getJSON(redditURL + localRedditAPIInfo, { "limit": "1", "url": url }, function (urlInfo) {
+                jQuery.ajax({
+                    "url": redditURL + localRedditAPIInfo,
+                    "data": { "limit": "1", "url": url },
+                    "dataType": "json",
+                    "jsonp": "jsonp",
+                    "timeout": 10000,
+                    "success": function (urlInfo) {
+                        var newURL, found, data;
+
+                        // If there are no responses from Reddit's API...
+                        if (urlInfo.data.children.length === 0) {
+                            // If the URL contains "imgur.com/", and auto-correction is enabled on the extension settings, correct it.
+                            if (safari.extension.settings.correctImgurLinks && url.indexOf("imgur.com/") !== -1) {
+                                // Get new (corrected) URL.
+                                newURL = fixImgurURL(url);
+
+                                // If the new (corrected) URL is different than the current URL, fetch and display info about it.
+                                if (newURL !== url) {
+                                    // Call this function with the new (corrected) URL.
+                                    bacon(newURL);
+                                    // Since we have already done the job, return.
+                                    return;
+                                }
+                            }
+
+                            // Print the not found message to the passed document object.
+                            found = "false";
+                            data = {
+                                "submitURL": redditURL + redditSubmit + url,
+                                "icon": redditIcon
+                            };
+                        // Else, if there are responses from Reddit's API...
+                        } else {
+                            // Compile information about Reddit's submission and print to the passed document object.
+                            found = "true";
+                            data = {
+                                "permalinkURL": redditURL + urlInfo.data.children[0].data.permalink,
+                                "thumb": (urlInfo.data.children[0].data.thumbnail !== "") ? urlInfo.data.children[0].data.thumbnail : redditIcon,
+                                "score": urlInfo.data.children[0].data.score,
+                                "redditURL": redditURL,
+                                "author": urlInfo.data.children[0].data.author,
+                                "subreddit": urlInfo.data.children[0].data.subreddit,
+                                "comments": urlInfo.data.children[0].data.num_comments,
+                                "title": urlInfo.data.children[0].data.title
+                            };
+                        }
+
+                        if (safari.extension.settings.usePopoverOrBar === "popover") {
+                            safari.extension.popovers[0].contentWindow.handleOutput({ "found": found, "data": data });
+                        } else {
+                            for (var i = 0; i < safari.extension.bars.length; ++i) {
+                                var bar = safari.extension.bars[i];
+                                if (bar.browserWindow === safari.application.activeBrowserWindow) {
+                                    bar.contentWindow.handleOutput({ "found": found, "data": data });
+                                }
+                            }
+                        }
+                    },
+                    "error": function () {
+                        if (safari.extension.settings.usePopoverOrBar === "popover") {
+                            safari.extension.popovers[0].contentWindow.handleOutput({ "found": "error" });
+                        } else {
+                            for (var i = 0; i < safari.extension.bars.length; ++i) {
+                                var bar = safari.extension.bars[i];
+                                if (bar.browserWindow === safari.application.activeBrowserWindow) {
+                                    bar.contentWindow.handleOutput({ "found": "error" });
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (safari.extension.settings.usePopoverOrBar === "popover") {
+                popover = safari.extension.createPopover("Bacon Popover", safari.extension.baseURI + "popover.html");
+                for (var i = 0; i < safari.extension.toolbarItems; ++i) {
+                    var toolbarItem = safari.extension.toolbarItems[i];
+                    if (toolbarItem.identifier === toolbarItemIdentifier) {
+                        toolbarItem.popover = popover;
+                    }
+                }
+                for (var i = 0; i < safari.extension.bars.length; ++i) {
+                    var bar = safari.extension.bars[i];
+                    if (bar.identifier === "Bacon Bar" && bar.visible) {
+                        bar.hide();
+                    }
+                }
+            } else {
+                for (var i = 0; i < safari.extension.toolbarItems; ++i) {
+                    var toolbarItem = safari.extension.toolbarItems[i];
+                    if (toolbarItem.identifier === toolbarItemIdentifier) {
+                        toolbarItem.command = "submitPage";
+                    }
+                }
+            }
+        </script>
+    </head>
+</html>
