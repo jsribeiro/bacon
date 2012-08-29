@@ -15,6 +15,10 @@
             var redditIcon = "icon.png";
             // Toolbar item identifier. Must match what is defined in the extension.
             var toolbarItemIdentifier = "Bacon";
+            // Bar identifier. Must match what is defined in the extension.
+            var barIdentifier = "Bacon Bar";
+            // Popover identifier.
+            var popoverIdentifier = "Bacon Popover";
 
             // Correct imgur URLs, by removing subdomains and file extensions.
             function fixImgurURL(url) {
@@ -39,7 +43,9 @@
                 return newURL;
             }
 
+            // Function that parses a template, inserting data.
             function parseOutput(template, data) {
+                // Use jQuery.nano for templating.
                 return jQuery.nano(template, data);
             }
 
@@ -48,13 +54,12 @@
                 var localRedditAPIInfo = redditAPIInfo, jsonRequest;
 
                 // Fetch this URL information through Reddit API.
-                //jQuery.getJSON(redditURL + localRedditAPIInfo, { "limit": "1", "url": url }, function (urlInfo) {
                 jQuery.ajax({
                     "url": redditURL + localRedditAPIInfo,
                     "data": { "limit": "1", "url": url },
                     "dataType": "json",
                     "jsonp": "jsonp",
-                    "timeout": 10000,
+                    "timeout": 10000, // Timeout: 10 seconds.
                     "success": function (urlInfo) {
                         var newURL, found, data;
 
@@ -74,7 +79,7 @@
                                 }
                             }
 
-                            // Print the not found message to the passed document object.
+                            // Prepare data for a "not found" message.
                             found = "false";
                             data = {
                                 "submitURL": redditURL + redditSubmit + url,
@@ -82,7 +87,7 @@
                             };
                         // Else, if there are responses from Reddit's API...
                         } else {
-                            // Compile information about Reddit's submission and print to the passed document object.
+                            // Prepare data for a page information message.
                             found = "true";
                             data = {
                                 "permalinkURL": redditURL + urlInfo.data.children[0].data.permalink,
@@ -96,11 +101,14 @@
                             };
                         }
 
+                        // If we're using popovers, send formatted HTML to our popover.
                         if (safari.extension.settings.usePopoverOrBar === "popover") {
                             safari.extension.popovers[0].contentWindow.handleOutput({ "found": found, "data": data });
+                        // If we're using extension bar, cycle all bars.
                         } else {
                             for (var i = 0; i < safari.extension.bars.length; ++i) {
                                 var bar = safari.extension.bars[i];
+                                // Send formatted HTML to the current active window bar.
                                 if (bar.browserWindow === safari.application.activeBrowserWindow) {
                                     bar.contentWindow.handleOutput({ "found": found, "data": data });
                                 }
@@ -108,11 +116,14 @@
                         }
                     },
                     "error": function () {
+                        // If we're using popovers, send error message to our popover.
                         if (safari.extension.settings.usePopoverOrBar === "popover") {
-                            safari.extension.popovers[0].contentWindow.handleOutput({ "found": "error" });
+                            safari.extension.popovers[popoverIdentifier].contentWindow.handleOutput({ "found": "error" });
+                        // If we're using extension bar, cycle all bars.
                         } else {
                             for (var i = 0; i < safari.extension.bars.length; ++i) {
                                 var bar = safari.extension.bars[i];
+                                // Send error message to the current active window bar.
                                 if (bar.browserWindow === safari.application.activeBrowserWindow) {
                                     bar.contentWindow.handleOutput({ "found": "error" });
                                 }
@@ -122,23 +133,32 @@
                 });
             }
 
+            // If we're using popovers...
             if (safari.extension.settings.usePopoverOrBar === "popover") {
-                popover = safari.extension.createPopover("Bacon Popover", safari.extension.baseURI + "popover.html");
+                // Create popover.
+                popover = safari.extension.createPopover(popoverIdentifier, safari.extension.baseURI + "popover.html");
+                // Cycle all toolbar icons.
                 for (var i = 0; i < safari.extension.toolbarItems; ++i) {
                     var toolbarItem = safari.extension.toolbarItems[i];
+                    // Associate popover to the correct toolbar icon.
                     if (toolbarItem.identifier === toolbarItemIdentifier) {
                         toolbarItem.popover = popover;
                     }
                 }
+                // Cycle all extension bars.
                 for (var i = 0; i < safari.extension.bars.length; ++i) {
                     var bar = safari.extension.bars[i];
-                    if (bar.identifier === "Bacon Bar" && bar.visible) {
+                    // Hide all of our extension bars.
+                    if (bar.identifier === barIdentifier && bar.visible) {
                         bar.hide();
                     }
                 }
+            // If we're using extension bars...
             } else {
+                // Cycle all toolbar icons.
                 for (var i = 0; i < safari.extension.toolbarItems; ++i) {
                     var toolbarItem = safari.extension.toolbarItems[i];
+                    // Associate "submitPage" command to the correct toolbar icon.
                     if (toolbarItem.identifier === toolbarItemIdentifier) {
                         toolbarItem.command = "submitPage";
                     }

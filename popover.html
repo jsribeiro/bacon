@@ -3,8 +3,8 @@
     <head>
         <title>Bacon Popover</title>
         <script>
-            // Popover identifier. Must match what is defined in the extension.
-            var popoverIdentifier = "Bacon Popover";
+            // Popover identifier. Fetch it from the global page.
+            var popoverIdentifier = safari.extension.globalPage.contentWindow.popoverIdentifier;
 
             // Variable that stores the last queried URL.
             var lastURL;

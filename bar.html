@@ -3,8 +3,8 @@
     <head>
         <title>Bacon Toolbar</title>
         <script>
-            // Bar identifier. Must match what is defined in the extension.
-            var barIdentifier = "Bacon Bar";
+            // Bar identifier.  Fetch it from the global page.
+            var barIdentifier = safari.extension.globalPage.contentWindow.barIdentifier;
 
             var previousActiveTab;
             // Variable that stores the last queried URL.
