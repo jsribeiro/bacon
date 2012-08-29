@@ -48,11 +48,14 @@
             }
             safari.application.addEventListener("popover", popoverHandler, false);
 
+            // Function that receives indication if there was anything found and, if so, prints the parsed data with the appropriate template.
             function handleOutput(output) {
                 var parsedOutput;
 
+                // In case of error, print a generic error message.
                 if (output.found === "error") {
                     document.getElementById("bacon").innerHTML = '<p id="fetching">Error while fetching information from Reddit...</p>';
+                // Parse and print "found" or "not found" message, according to each case.
                 } else {
                     parsedOutput = safari.extension.globalPage.contentWindow.parseOutput(output.found === "true" ? outputFoundTemplate : outputNotFoundTemplate, output.data);
                     document.getElementById("bacon").innerHTML = parsedOutput;
