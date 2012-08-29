@@ -51,11 +51,11 @@
 
             // Function that fetches and prints information from Reddit about an URL.
             function bacon(url) {
-                var localRedditAPIInfo = redditAPIInfo, jsonRequest;
+                var jsonRequest;
 
                 // Fetch this URL information through Reddit API.
                 jQuery.ajax({
-                    "url": redditURL + localRedditAPIInfo,
+                    "url": redditURL + redditAPIInfo,
                     "data": { "limit": "1", "url": url },
                     "dataType": "json",
                     "jsonp": "jsonp",
