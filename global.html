@@ -5,6 +5,8 @@
         <script src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
         <script src="https://raw.github.com/trix/nano/master/jquery.nano.js"></script>
         <script>
+            var i, popover;
+
             // Reddit base URL.
             var redditURL = "http://www.reddit.com";
             // Reddit API address for information on URL.
@@ -22,6 +24,7 @@
 
             // Correct imgur URLs, by removing subdomains and file extensions.
             function fixImgurURL(url) {
+                "use strict";
                 var protocol, address, newURL;
 
                 // Get protocol (http or https).
@@ -45,14 +48,14 @@
 
             // Function that parses a template, inserting data.
             function parseOutput(template, data) {
+                "use strict";
                 // Use jQuery.nano for templating.
                 return jQuery.nano(template, data);
             }
 
             // Function that fetches and prints information from Reddit about an URL.
             function bacon(url) {
-                var jsonRequest;
-
+                "use strict";
                 // Fetch this URL information through Reddit API.
                 jQuery.ajax({
                     "url": redditURL + redditAPIInfo,
@@ -61,7 +64,7 @@
                     "jsonp": "jsonp",
                     "timeout": 10000, // Timeout: 10 seconds.
                     "success": function (urlInfo) {
-                        var newURL, found, data;
+                        var newURL, found, data, i, bar;
 
                         // If there are no responses from Reddit's API...
                         if (urlInfo.data.children.length === 0) {
@@ -106,8 +109,8 @@
                             safari.extension.popovers[0].contentWindow.handleOutput({ "found": found, "data": data });
                         // If we're using extension bar, cycle all bars.
                         } else {
-                            for (var i = 0; i < safari.extension.bars.length; ++i) {
-                                var bar = safari.extension.bars[i];
+                            for (i = 0; i < safari.extension.bars.length; i += 1) {
+                                bar = safari.extension.bars[i];
                                 // Send formatted HTML to the current active window bar.
                                 if (bar.browserWindow === safari.application.activeBrowserWindow) {
                                     bar.contentWindow.handleOutput({ "found": found, "data": data });
@@ -116,13 +119,15 @@
                         }
                     },
                     "error": function () {
+                        var i, bar;
+
                         // If we're using popovers, send error message to our popover.
                         if (safari.extension.settings.usePopoverOrBar === "popover") {
                             safari.extension.popovers[popoverIdentifier].contentWindow.handleOutput({ "found": "error" });
                         // If we're using extension bar, cycle all bars.
                         } else {
-                            for (var i = 0; i < safari.extension.bars.length; ++i) {
-                                var bar = safari.extension.bars[i];
+                            for (i = 0; i < safari.extension.bars.length; i += 1) {
+                                bar = safari.extension.bars[i];
                                 // Send error message to the current active window bar.
                                 if (bar.browserWindow === safari.application.activeBrowserWindow) {
                                     bar.contentWindow.handleOutput({ "found": "error" });
@@ -138,7 +143,7 @@
                 // Create popover.
                 popover = safari.extension.createPopover(popoverIdentifier, safari.extension.baseURI + "popover.html");
                 // Cycle all toolbar icons.
-                for (var i = 0; i < safari.extension.toolbarItems; ++i) {
+                for (i = 0; i < safari.extension.toolbarItems; i += 1) {
                     var toolbarItem = safari.extension.toolbarItems[i];
                     // Associate popover to the correct toolbar icon.
                     if (toolbarItem.identifier === toolbarItemIdentifier) {
@@ -146,7 +151,7 @@
                     }
                 }
                 // Cycle all extension bars.
-                for (var i = 0; i < safari.extension.bars.length; ++i) {
+                for (i = 0; i < safari.extension.bars.length; i += 1) {
                     var bar = safari.extension.bars[i];
                     // Hide all of our extension bars.
                     if (bar.identifier === barIdentifier && bar.visible) {
@@ -156,7 +161,7 @@
             // If we're using extension bars...
             } else {
                 // Cycle all toolbar icons.
-                for (var i = 0; i < safari.extension.toolbarItems; ++i) {
+                for (i = 0; i < safari.extension.toolbarItems; i += 1) {
                     var toolbarItem = safari.extension.toolbarItems[i];
                     // Associate "submitPage" command to the correct toolbar icon.
                     if (toolbarItem.identifier === toolbarItemIdentifier) {

@@ -11,21 +11,22 @@
 
             // "Not found" message template.
             var outputNotFoundTemplate = '';
-            outputNotFoundTemplate += '<p><a href="{submitURL}"><img id="thumb" src="{icon}" alt="reddit" /></a></p>';
-            outputNotFoundTemplate += '<p id="notfound">This page was not<br />found on reddit.</p>';
-            outputNotFoundTemplate += '<p>(<a href="{submitURL}">submit</a>)</p>';
+            outputNotFoundTemplate += '<p><a href="{submitURL}"><img id="thumb" src="{icon}" alt="reddit" \/><\/a><\/p>';
+            outputNotFoundTemplate += '<p id="notfound">This page was not<br \/>found on reddit.<\/p>';
+            outputNotFoundTemplate += '<p>(<a href="{submitURL}">submit<\/a>)<\/p>';
             // "Found" message template.
             var outputFoundTemplate = '';
-            outputFoundTemplate += '<p><a href="{permalinkURL}"><img id="thumb" src="{thumb}" /></a></p>';
-            outputFoundTemplate += '<p id="meta"><span id="score">({score})</span><br />'
-                                    + 'posted by <a href="{redditURL}/user/{author}">{author}</a><br />'
-                                    + 'to <a href="{redditURL}/r/{subreddit}">/r/{subreddit}</a><br />'
-                                    + '(<a href="{permalinkURL}">{comments} comments</a>)</p>';
-            outputFoundTemplate += '<p id="title"><a href="{permalinkURL}">{title}</a></p>';
+            outputFoundTemplate += '<p><a href="{permalinkURL}"><img id="thumb" src="{thumb}" \/><\/a><\/p>';
+            outputFoundTemplate += '<p id="meta"><span id="score">({score})<\/span><br \/>'
+                                    + 'posted by <a href="{redditURL}/user/{author}">{author}<\/a><br \/>'
+                                    + 'to <a href="{redditURL}/r/{subreddit}">/r/{subreddit}<\/a><br \/>'
+                                    + '(<a href="{permalinkURL}">{comments} comments<\/a>)<\/p>';
+            outputFoundTemplate += '<p id="title"><a href="{permalinkURL}">{title}<\/a><\/p>';
 
             // Handle new appearance of popover (button click), through popover events.
             function popoverHandler(event) {
-                var parsedOutput, currentURL;
+                "use strict";
+                var currentURL;
 
                 // If the event target is not this popover, ignore.
                 if (event.target.identifier !== popoverIdentifier) {
@@ -41,7 +42,7 @@
                 lastURL = currentURL;
 
                 // Show the fetching message...
-                document.getElementById("bacon").innerHTML = '<p id="fetching"><img src="loading.gif" /></p><p>Fetching information from Reddit...</p>';
+                document.getElementById("bacon").innerHTML = '<p id="fetching"><img src="loading.gif" \/><\/p><p>Fetching information from Reddit...<\/p>';
 
                 // Fetch and display info about the page URL.
                 safari.extension.globalPage.contentWindow.bacon(currentURL);
@@ -50,11 +51,12 @@
 
             // Function that receives indication if there was anything found and, if so, prints the parsed data with the appropriate template.
             function handleOutput(output) {
+                "use strict";
                 var parsedOutput;
 
                 // In case of error, print a generic error message.
                 if (output.found === "error") {
-                    document.getElementById("bacon").innerHTML = '<p id="fetching">Error while fetching information from Reddit...</p>';
+                    document.getElementById("bacon").innerHTML = '<p id="fetching">Error while fetching information from Reddit...<\/p>';
                 // Parse and print "found" or "not found" message, according to each case.
                 } else {
                     parsedOutput = safari.extension.globalPage.contentWindow.parseOutput(output.found === "true" ? outputFoundTemplate : outputNotFoundTemplate, output.data);

@@ -11,15 +11,15 @@
             var lastURL;
 
             // "Not found" bar template.
-            var outputNotFoundTemplate = 'This page was not found on reddit. (<a href="{submitURL}">submit</a>)';
+            var outputNotFoundTemplate = 'This page was not found on reddit. (<a href="{submitURL}">submit<\/a>)';
             // "Found" bar template.
-            var outputFoundTemplate = '<span id="score">({score})</span> <a href="{permalinkURL}">{title}</a> - posted by <a href="{redditURL}/user/{author}">{author}</a> to <a href="{redditURL}/r/{subreddit}">/r/{subreddit}</a> (<a href="{permalinkURL}">{comments} comments</a>)';
+            var outputFoundTemplate = '<span id="score">({score})<\/span> <a href="{permalinkURL}">{title}<\/a> - posted by <a href="{redditURL}/user/{author}">{author}<\/a> to <a href="{redditURL}/r/{subreddit}">/r/{subreddit}<\/a> (<a href="{permalinkURL}">{comments} comments<\/a>)';
 
             safari.self.hide();
 
-            setInterval("verifyTabChange()", 200);
             function verifyTabChange() {
-                var parsedOutput, currentTab, activeTabURL;
+                "use strict";
+                var currentTab, activeTabURL;
 
                 currentTab = safari.application.activeBrowserWindow.activeTab;
                 activeTabURL = currentTab.url;
@@ -38,11 +38,13 @@
 
                 safari.extension.globalPage.contentWindow.bacon(currentTab.url);
             }
+            setInterval(verifyTabChange, 200);
 
             function handleOutput(output) {
+                "use strict";
                 var parsedOutput;
 
-                if ((! safari.self.visible) && (output.found === "true" || output.found === "error")) {
+                if ((!safari.self.visible) && (output.found === "true" || output.found === "error")) {
                     safari.self.show();
                 }
 
